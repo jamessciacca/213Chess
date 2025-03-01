@@ -1,4 +1,4 @@
-package src.chess;
+package chess;
 
 public class Board {
     //Checklist for Board Logic
@@ -82,46 +82,98 @@ public class Board {
     //creating move piece function that moves a piece on board only if the move is valid
     public boolean movePiece(int startRow, int startCol, int endRow, int endCol) {
         Piece piece = board[startRow][startCol];
-
+    
         if (piece == null) {
             System.out.println("No piece at the selected square.");
             return false;
         }
-
-        if (piece.isValidMove(endRow, endCol, this) && isPathClear(piece, startRow, startCol, endRow, endCol)) {
-            board[endRow][endCol] = piece; // Move piece to new position
-            board[startRow][startCol] = null; // Clear old position
-            piece.setPosition(endRow, endCol);
-            return true;
+    
+        if (!piece.isValidMove(endRow, endCol, this) || !isPathClear(piece, startRow, startCol, endRow, endCol)) {
+            System.out.println("Invalid move.");
+            return false;
         }
-
-        System.out.println("Invalid move.");
+    
+        // Temporarily make the move
+        Piece capturedPiece = board[endRow][endCol]; // Save the captured piece (if any)
+        board[endRow][endCol] = piece;
+        board[startRow][startCol] = null;
+        piece.setPosition(endRow, endCol);
+    
+        // If move puts own King in check, revert the move
+        if (isKingInCheck(piece.getColor())) {
+            board[startRow][startCol] = piece; // Revert move
+            board[endRow][endCol] = capturedPiece; // Restore captured piece (if any)
+            piece.setPosition(startRow, startCol);
+            System.out.println("Move puts king in check. Try again.");
+            return false;
+        }
+    
+        return true;
+    }
+    
+    private boolean isKingInCheck(char color) {
+        int kingRow = -1, kingCol = -1;
+    
+        // Find the King's position
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (board[i][j] instanceof King && board[i][j].getColor() == color) {
+                    kingRow = i;
+                    kingCol = j;
+                    break;
+                }
+            }
+        }
+    
+        // Check if any opponent piece can attack the King
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (board[i][j] != null && board[i][j].getColor() != color) {
+                    if (board[i][j].isValidMove(kingRow, kingCol, this) && isPathClear(board[i][j], i, j, kingRow, kingCol)) {
+                        return true; // King is in check
+                    }
+                }
+            }
+        }
+    
         return false;
     }
+    
 
     // Checks if the path is clear for Rook, Bishop, and Queen (not needed for Knight)
     private boolean isPathClear(Piece piece, int startRow, int startCol, int endRow, int endCol) {
-        if (piece instanceof Knight) return true; // Knights jump over pieces
-
+        if (piece instanceof Knight) return true; // Knights can jump over pieces
+    
+        int rowDiff = Math.abs(endRow - startRow);
+        int colDiff = Math.abs(endCol - startCol);
+    
+        // Rook must move in a straight line
+        if (piece instanceof Rook && (startRow != endRow && startCol != endCol)) return false;
+    
+        // Bishop must move diagonally
+        if (piece instanceof Bishop && rowDiff != colDiff) return false;
+    
+        // Queen must move like a Rook or a Bishop
+        if (piece instanceof Queen && !(startRow == endRow || startCol == endCol || rowDiff == colDiff)) return false;
+    
         int rowStep = Integer.compare(endRow, startRow);
         int colStep = Integer.compare(endCol, startCol);
-
+    
         int currRow = startRow + rowStep;
         int currCol = startCol + colStep;
-
+    
         while (currRow != endRow || currCol != endCol) {
-            if (board[currRow][currCol] != null) return false; // Piece blocking path
+            //this means the path is blocked
+            if (board[currRow][currCol] != null) return false;
             currRow += rowStep;
             currCol += colStep;
         }
-
-        return true; // Path is clear
+        //this means the path is clear
+        return true;
     }
-
+    
     // Get piece at a given position
     public Piece getPiece(int row, int col) {
         return board[row][col];
     }
-
-    
 }

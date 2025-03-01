@@ -1,4 +1,4 @@
-package src.chess;
+package chess;
 
 public abstract class Piece {
     //need to create a colors for the pieces

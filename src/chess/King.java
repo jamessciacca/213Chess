@@ -1,4 +1,4 @@
-package src.chess;
+package chess;
 
 //the king can only move in one singular direction at a time
 

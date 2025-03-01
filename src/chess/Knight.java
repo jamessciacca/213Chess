@@ -1,4 +1,4 @@
-package src.chess;
+package chess;
 
 public class Knight extends Piece{
     public Knight(char color, int row, int col){

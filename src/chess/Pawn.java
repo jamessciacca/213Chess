@@ -1,4 +1,4 @@
-package src.chess;
+package chess;
 
 //a pawn can move one square forward, two on the first move only, and cannot move backwards, it captures one square diagonally forward, and when it reaches the last row it can be promoted to a Queen, Rook, Bishop, or Knight.
 public class Pawn extends Piece{

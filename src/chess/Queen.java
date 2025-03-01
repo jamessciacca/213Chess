@@ -1,4 +1,4 @@
-package src.chess;
+package chess;
 //all separate piece types will extend piece
 public class Queen extends Piece {
     
